@@ -22,7 +22,7 @@ napari is a fast, interactive, multi-dimensional image viewer, with [a vibrant p
 
 napari is an open source project on [GitHub](https://github.com/napari/napari) to facilitate transparency, reuse, and extensibility. 
 
-At its core, it provides critical viewer features out-of-the-box, such as support for large multi-dimensional data; provide “layers” to simultaneously visualize images, models, and analysis results; and easy manual, interactive annotation in 3D. 
+At its core, it provides critical viewer features out-of-the-box, such as support for large multi-dimensional data; provide “layers” to simultaneously visualize images, models, and analysis results; and easy manual, interactive annotation in 3D.
 
 +++
 
@@ -31,14 +31,15 @@ At its core, it provides critical viewer features out-of-the-box, such as suppor
 This tutorial is for napari first-timers to give them a quick glance of what napari does, and give it a try right away. We will cover:
 
 - Installation 
+- Open napari
 - Open an image
-- View the image in 2D/3D
-- Manually add points to label cells
+- Image display adjustment
+- Manually label the cell
 - Make an animation
 
-Along the way, you will see how to access napari functions from Python code and from GUI - though for different purposes, one method might be easier than another. 
+Along the way, you will see how to access napari functions from [Python code](https://napari.org/api/stable/index.html) and from GUI - though for different purposes, one method might be easier than another. This quick start guide will not cover ALL possible methods but just some ways to perform basic tasks. For the more complete guide, please visit [napari.org](https://napari.org/).
 
-You will also see some examples of plugins. The core napari viewer focuses on domain-agnostic functions i.e.<TO DO>  
+You will also see some examples of plugins. The core napari viewer focuses on domain-agnostic functions such as layer controls. Analyses and domain specific functions, such as reading a special file format and image segmentation, live in the realm of [plugins](https://www.napari-hub.org/).    
 
 ** This tutorial uses napari 0.4.13. <br>
 
@@ -53,11 +54,6 @@ You will also see some examples of plugins. The core napari viewer focuses on do
 ```python
 pip install 'napari[all]'
 ```
-    Once installed, simply run
-    
-```python
-napari
-```
 
 - Or download the bundled app for simple installation:
 
@@ -69,63 +65,86 @@ napari
     
     Note: for the latest release, please visit [here](https://github.com/napari/napari/releases) and look for Assets.
 
-If you run into any issue, please visit the more detailed [installation guide](https://napari.org/tutorials/fundamentals/installation.html), or report an issue on GitHub! 
+If you run into any issue, please visit the more detailed [installation guide](https://napari.org/tutorials/fundamentals/installation.html), or report an issue on GitHub!
+
++++
+
+### Open napari
+
+napari can be opened by [multiple ways](https://napari.org/tutorials/fundamentals/getting_started.html), depending on how its used in your image analysis workflow. 
+
+Here we will be mainly focused on the GUI application.
+
+- From command line: 
+
+    Once installed, simply run    
+```python
+napari
+```
+
+- If you installed the bundled app:
+
+    Click on the app icon to open it.<br>
+    *Note: for mac users, it may require [security setting changes](https://napari.org/tutorials/fundamentals/installation.html).*
 
 +++
 
 ### Open an image
 
-napari natively supports tiff (and other formats supported by skimage.io.imread) as input image file format.<br>
-Try downloading [this ome tiff file](https://downloads.openmicroscopy.org/images/OME-TIFF/2016-06/MitoCheck/00001_01.ome.tiff), and drag and drop the file in napari.
+napari natively supports tiff and many other formats supported by [skimage.io.imread](https://scikit-image.org/docs/dev/api/skimage.io.html) as input image file format.<br>
+Try with your own images or download [this ome tiff file](https://downloads.openmicroscopy.org/images/OME-TIFF/2016-06/MitoCheck/00001_01.ome.tiff).
 
 Additional input file formats may be supported [by plugins](https://www.napari-hub.org/). 
 Try [napari-aicsimageio](https://www.napari-hub.org/plugins/napari-aicsimageio) if you have czi, lif, or nd2 files.
+
+Once you have the proper plugin installed, use File > Open Files(s)... and select the image file, or simply drag and drop the image into napari. 
+
+For demo purpose, we will use a sample image that comes with napari.
+
+(1) Open napari IPython console
+**to do: add image**
+    
+(2) Type
+    
+```python
+from skimage import data
+viewer.add_image(data.cell(), name='cell')
+```
 
 ```{code-cell} ipython3
 :tags: [hide-cell]
 
 import napari
+from napari.utils import nbscreenshot
+
 viewer = napari.Viewer()
+
 from skimage import data
-#load multichannel image in one line, with additional options
-viewer = napari.view_image(data.cells3d(), channel_axis=1, name=["membrane", "nuclei"])
-viewer.dims.ndisplay = 3
+viewer.add_image(data.cell(), name='cell')
+nbscreenshot(viewer)
 ```
 
-````{tabbed} napari in code
+### Image display adjustment
+
+The layer control panel at the upper left of napari viewer allows you adjust contrast, colormap etc. These settings affect the visualization, but do not affect the underlying data.
+
+To change the image display through [API](https://napari.org/api/stable/napari.layers.Image.html), in IPython console, type
 
 ```python
-import napari
-viewer = napari.Viewer()
-from skimage import data
-#load multichannel image in one line, with additional options
-viewer = napari.view_image(data.cells3d(), channel_axis=1, name=["membrane", "nuclei"], colormap=["green", "magenta"])
-viewer.dims.ndisplay = 3
+viewer.layers['cell'].colormap = "red"
 ```
 
-````
+```{code-cell} ipython3
+:tags: [hide-cell]
 
-````{tabbed} napari in GUI gif
-![SegmentLocal](file_open.gif "segment")
-````
-
-+++
-
-## Install plugins
-
-[napari hub](https://www.napari-hub.org/) lets users browse existing napari plugins. Most plugins can be installed either via pip install, or from napari viewer.
-
-````{tabbed} pip install
-
-```python
-pip install NicePlugin
+viewer.layers['cell'].colormap = "red"
+nbscreenshot(viewer)
 ```
 
-````
+### Manually label the cell
 
-````{tabbed} napari viewer plugin install
-place holder for plugin install gif
-````
+To measure the area of the cell, we can use Labels layer and manually "paint" the cell.
+The labels layer allows you to record the segmentation result by assigning background = 0, and each object with 
 
 +++
 
@@ -138,30 +157,6 @@ voxel size and time interval <br>
 print("image dimension in (z,y,x):", viewer.layers['nuclei'].data.shape)
 print("image voxel size for (z,y,x):", viewer.layers['nuclei'].scale)
 ```
-
-## Adjust image display
-
-Both API and GUI have flexible image display control.<br>
-
-For other display options, see [napari image layer API](https://napari.org/api/stable/napari.layers.Image.html).
-
-+++
-
-````{tabbed} napari in code
-
-```python
-#change nuclei color to magenta
-viewer.layers['nuclei'].colormap = 'red'
-viewer.layers['membrane'].colormap = 'green'
-```
-
-````
-
-````{tabbed} napari in GUI gif
-![SegmentLocal](colormap.gif "segment")
-````
-
-+++
 
 ## File saving
 
@@ -185,3 +180,8 @@ place holder for file saving gif
 
 viewer.close()
 ```
+
+### FAQ
+
+Q: Can I have someone come teach napari to my group? 
+Q: What if the plugin doesn't work with your image?
