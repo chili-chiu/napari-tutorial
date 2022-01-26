@@ -103,8 +103,7 @@ Once you have the proper plugin installed, use File > Open Files(s)... and selec
 For demo purpose, we will use a sample image that comes with napari.
 
 (1) Open napari IPython console
-**to do: add image**
-    
+<img src="img/IPython.png" alt="IPython console" width="30%"/>
 (2) Type
     
 ```python
@@ -152,7 +151,7 @@ The labels layer allows you to record the segmentation result by assigning backg
 (3) Circle the cell <br>
 (4) Use "fill" bucket to fill it. <br>
 
-to do: add gif
+![manual_label](./img/manual_label.gif)
 
 Several plugins can perform automatic segmentation that takes Image layer as input, and generates Labels layer as output. Try [cellpose-napari](https://www.napari-hub.org/plugins/cellpose-napari) if you have cell images.
 
