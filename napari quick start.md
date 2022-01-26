@@ -35,6 +35,7 @@ This tutorial is for napari first-timers to give them a quick glance of what nap
 - Open an image
 - Image display adjustment
 - Manually label the cell
+- Get the cell area measurement
 - Make an animation
 
 Along the way, you will see how to access napari functions from [Python code](https://napari.org/api/stable/index.html) and from GUI - though for different purposes, one method might be easier than another. This quick start guide will not cover ALL possible methods but just some ways to perform basic tasks. For the more complete guide, please visit [napari.org](https://napari.org/).
@@ -131,57 +132,50 @@ The layer control panel at the upper left of napari viewer allows you adjust con
 To change the image display through [API](https://napari.org/api/stable/napari.layers.Image.html), in IPython console, type
 
 ```python
-viewer.layers['cell'].colormap = "red"
+viewer.layers['cell'].colormap = "yellow"
 ```
 
 ```{code-cell} ipython3
 :tags: [hide-cell]
 
-viewer.layers['cell'].colormap = "red"
+viewer.layers['cell'].colormap = "yellow"
 nbscreenshot(viewer)
 ```
 
 ### Manually label the cell
 
-To measure the area of the cell, we can use Labels layer and manually "paint" the cell.
-The labels layer allows you to record the segmentation result by assigning background = 0, and each object with 
+To measure the area of the cell, we can use labels layer and manually "paint" the cell.
+The labels layer allows you to record the segmentation result by assigning background = 0, and assigning each object with an integer.
+
+(1) Add a new labels layer <br> 
+(2) Click on "paint" <br>
+(3) Circle the cell <br>
+(4) Use "fill" bucket to fill it. <br>
+
+to do: add gif
+
+Several plugins can perform automatic segmentation that takes Image layer as input, and generates Labels layer as output. Try [cellpose-napari](https://www.napari-hub.org/plugins/cellpose-napari) if you have cell images.
 
 +++
 
-## Get image info
+### Get the cell area measurement
 
-Image dimension <br>
-voxel size and time interval <br>
+[skimage.measure.regionprops](https://scikit-image.org/docs/dev/api/skimage.measure.html#skimage.measure.regionprops) provides a good set of features that can be extracted from labels, including area measurement.
 
-```{code-cell} ipython3
-print("image dimension in (z,y,x):", viewer.layers['nuclei'].data.shape)
-print("image voxel size for (z,y,x):", viewer.layers['nuclei'].scale)
-```
-
-## File saving
-
-Default or recommended file formats for each layer type:
-???
-
-````{tabbed} napari in code
+In IPython console, type
 
 ```python
-napari.save_layers(path, layers)
+from skimage.measure import regionprops
+props = regionprops(viewer.layers['Labels'].data)
+print("the cell area is: ", props[0].area)
 ```
 
-````
+Alternatively, try [this plugin](https://www.napari-hub.org/plugins/napari-skimage-regionprops) to have the result in a table form.
 
-````{tabbed} napari in GUI gif
-place holder for file saving gif
-````
+**Note:** the area reported by regionprops is the number of pixels. Check pixel size and convert the reported number to physical units.
 
 ```{code-cell} ipython3
 :tags: [hide-cell]
 
-viewer.close()
+viewer.close_all()
 ```
-
-### FAQ
-
-Q: Can I have someone come teach napari to my group? 
-Q: What if the plugin doesn't work with your image?
